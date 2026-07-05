@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Research Tool</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <div class="titlebar">
+      <div class="titlebar-drag">
+        <span class="titlebar-title">Research Tool</span>
+      </div>
+      <div class="titlebar-controls">
+        <button class="titlebar-btn" id="minimizeBtn" title="Minimize">─</button>
+        <button class="titlebar-btn" id="maximizeBtn" title="Maximize">□</button>
+        <button class="titlebar-btn titlebar-close" id="closeBtn" title="Close">✕</button>
+      </div>
+    </div>
+
+    <div class="content-area">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <span class="logo-icon">🔬</span>
+          <span class="logo-text">ResearchTool</span>
+        </div>
+      </div>
+
+      <div class="session-controls">
+        <button id="startResearchBtn" class="btn btn-primary">
+          <span class="btn-icon">▶</span>
+          Start Research
+        </button>
+        <button id="endResearchBtn" class="btn btn-danger" style="display: none;">
+          <span class="btn-icon">■</span>
+          End Research
+        </button>
+      </div>
+
+      <div id="sessionInfo" class="session-info" style="display: none;">
+        <div class="status-indicator">
+          <span class="status-dot active"></span>
+          <span>Research Active</span>
+        </div>
+        <div class="session-stats">
+          <div class="stat">
+            <span class="stat-value" id="captureCount">0</span>
+            <span class="stat-label">Captures</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="pageCount">0</span>
+            <span class="stat-label">Pages</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-nav">
+        <button id="aiAssistantNavBtn" class="sidebar-nav-btn active" data-screen="ai">
+          <span>🤖</span> AI Assistant
+        </button>
+      </div>
+
+      <div class="past-sessions">
+        <h3 class="section-title">Past Sessions</h3>
+        <div id="sessionList" class="session-list"></div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button id="settingsBtn" class="sidebar-footer-btn" title="Settings">⚙️ Settings</button>
+        <span class="version">v1.0.0</span>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div id="welcomeScreen" class="screen welcome-screen">
+        <div class="welcome-content">
+          <div class="welcome-icon">🔬</div>
+          <h1>Welcome to Research Tool</h1>
+          <p>Capture web data seamlessly as you browse. Click <strong>Start Research</strong> to begin a new session.</p>
+          <div class="welcome-features">
+            <div class="feature">
+              <span class="feature-icon">🖱️</span>
+              <span>Click elements to capture</span>
+            </div>
+            <div class="feature">
+              <span class="feature-icon">📄</span>
+              <span>Select text on any page</span>
+            </div>
+            <div class="feature">
+              <span class="feature-icon">📊</span>
+              <span>Capture entire tables</span>
+            </div>
+            <div class="feature">
+              <span class="feature-icon">📋</span>
+              <span>Save full page content</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="researchScreen" class="screen research-screen" style="display: none;">
+        <div class="research-header">
+          <h2>Research Session</h2>
+          <span id="sessionIdDisplay" class="session-id"></span>
+        </div>
+        <div class="research-tips">
+          <p>💡 The browser window is open. Use the extension to capture data from any webpage.</p>
+        </div>
+        <div class="captures-container">
+          <div class="captures-sidebar">
+            <div class="captures-sidebar-header">
+              <h3>Captured Pages</h3>
+              <span id="totalCaptures" class="badge">0</span>
+            </div>
+            <div id="capturesList" class="captures-list">
+              <div class="empty-captures">No captures yet. Browse the web and capture data using the extension.</div>
+            </div>
+          </div>
+          <div class="capture-detail">
+            <div id="captureDetail" class="capture-detail-content">
+              <div class="detail-placeholder">
+                <span class="placeholder-icon">📋</span>
+                <p>Select a captured item to view its details</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="reviewScreen" class="screen review-screen" style="display: none;">
+        <div class="review-header">
+          <div>
+            <h2>Session Review</h2>
+            <span id="reviewSessionId" class="session-id"></span>
+          </div>
+          <div class="review-actions">
+            <button id="exportJsonBtn" class="btn btn-secondary">
+              <span class="btn-icon">⬇</span>
+              Export JSON
+            </button>
+            <button id="newResearchBtn" class="btn btn-primary">
+              <span class="btn-icon">▶</span>
+              New Research
+            </button>
+          </div>
+        </div>
+
+        <div class="review-content">
+          <div class="captures-container">
+            <div class="captures-sidebar">
+              <div class="captures-sidebar-header">
+                <h3>Captured Items</h3>
+                <span id="reviewTotalCaptures" class="badge">0</span>
+              </div>
+              <div id="reviewCapturesList" class="captures-list"></div>
+            </div>
+            <div class="capture-detail">
+              <div id="reviewCaptureDetail" class="capture-detail-content">
+                <div class="detail-placeholder">
+                  <span class="placeholder-icon">📋</span>
+                  <p>Select a captured item to view its details</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="reviewAiPanel" class="review-ai-panel">
+            <div class="review-ai-header" id="reviewAiToggle">
+              <span>🤖 AI Assistant</span>
+              <span class="review-ai-toggle-icon">▼</span>
+            </div>
+            <div class="review-ai-body" id="reviewAiBody">
+              <div id="reviewAiMessages" class="review-ai-messages">
+                <div class="ai-empty-msg">Ask AI to analyze, summarize, or generate content from this session's data.</div>
+              </div>
+              <div class="review-ai-input-row">
+                <select id="reviewAiSession" class="review-ai-session-select" title="Session to use as context"></select>
+                <input id="reviewAiInput" class="review-ai-input" type="text" placeholder="Ask AI about this research..." />
+                <button id="reviewAiSendBtn" class="btn btn-primary review-ai-send" title="Send">➤</button>
+              </div>
+              <div class="review-ai-quick-actions">
+                <button class="btn btn-secondary btn-sm" data-action="summarize">Summarize</button>
+                <button class="btn btn-secondary btn-sm" data-action="article">Write Article</button>
+                <button class="btn btn-secondary btn-sm" data-action="presentation">Presentation</button>
+                <button class="btn btn-secondary btn-sm" data-action="excel">Excel Data</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="aiScreen" class="screen ai-screen" style="display: none;">
+        <div class="ai-header">
+          <div class="ai-header-left">
+            <h2>🤖 AI Assistant</h2>
+            <span class="ai-subtitle">Use AI to analyze, transform and generate content from your research data</span>
+          </div>
+          <div class="ai-header-right">
+            <select id="aiSessionSelect" class="ai-session-select">
+              <option value="">— Select a session —</option>
+            </select>
+          </div>
+        </div>
+        <div class="ai-quick-actions">
+          <button class="btn btn-secondary btn-sm" data-action="summarize">📝 Summarize</button>
+          <button class="btn btn-secondary btn-sm" data-action="article">📄 Write Article</button>
+          <button class="btn btn-secondary btn-sm" data-action="presentation">📊 Presentation</button>
+          <button class="btn btn-secondary btn-sm" data-action="excel">📋 Excel Data</button>
+          <button class="btn btn-secondary btn-sm" data-action="blog">✍️ Blog Post</button>
+          <button class="btn btn-secondary btn-sm" data-action="report">📑 Report</button>
+        </div>
+        <div id="aiMessages" class="ai-messages">
+          <div class="ai-empty-msg">
+            <div class="ai-welcome-icon">🤖</div>
+            <h3>AI Research Assistant</h3>
+            <p>Select a research session and ask me to analyze your captured data, generate content, or create structured outputs like presentations and spreadsheets.</p>
+          </div>
+        </div>
+        <div class="ai-input-area">
+          <input id="aiInput" class="ai-input" type="text" placeholder="Ask AI to do something with your research data..." />
+          <button id="aiSendBtn" class="btn btn-primary ai-send-btn" title="Send">➤</button>
+        </div>
+      </div>
+    </main>
+    </div>
+  </div>
+
+  <div id="confirmOverlay" class="confirm-overlay">
+    <div class="confirm-modal">
+      <div class="confirm-icon">⚠️</div>
+      <div id="confirmText" class="confirm-text">Are you sure you want to delete this capture?</div>
+      <div class="confirm-actions">
+        <button id="confirmNoBtn" class="btn btn-secondary">No</button>
+        <button id="confirmYesBtn" class="btn btn-danger">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="settingsOverlay" class="confirm-overlay">
+    <div class="settings-modal">
+      <div class="settings-header">
+        <h3>⚙️ Settings</h3>
+        <button id="settingsCloseBtn" class="settings-close">✕</button>
+      </div>
+      <div class="settings-body">
+        <div class="settings-group">
+          <label class="settings-label">Provider</label>
+          <select id="settingsProvider" class="settings-input">
+            <option value="openai">OpenAI</option>
+            <option value="openrouter">OpenRouter</option>
+          </select>
+        </div>
+        <div class="settings-group">
+          <label class="settings-label">API Key</label>
+          <input id="settingsApiKey" class="settings-input" type="password" placeholder="sk-... or openrouter key" />
+        </div>
+        <div class="settings-group">
+          <label class="settings-label">Model</label>
+          <div class="settings-model-row">
+            <select id="settingsModel" class="settings-input settings-model-select">
+              <option value="">Loading models...</option>
+            </select>
+            <button id="fetchModelsBtn" class="btn btn-secondary btn-sm" title="Fetch available models">⟳ Fetch</button>
+          </div>
+        </div>
+      </div>
+      <div class="settings-footer">
+        <button id="settingsSaveBtn" class="btn btn-primary">Save Settings</button>
+        <span id="settingsStatus" class="settings-status"></span>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 280px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f1117;
+      color: #e8eaf0;
+      padding: 12px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #2e3144;
+    }
+    .header-icon { font-size: 18px; }
+    .header-title { font-size: 14px; font-weight: 600; }
+    .status {
+      margin-left: auto;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .status.connected { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .status.disconnected { background: rgba(239,68,68,0.15); color: #f87171; }
+    .status-text { font-size: 11px; color: #8b8fa3; margin-bottom: 12px; }
+    .btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 1px solid #2e3144;
+      border-radius: 6px;
+      background: #1a1d27;
+      color: #e8eaf0;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-bottom: 6px;
+    }
+    .btn:hover { background: #242738; border-color: #6366f1; }
+    .btn-icon { font-size: 16px; }
+    .btn-shortcut {
+      margin-left: auto;
+      font-size: 10px;
+      color: #5c6072;
+    }
+    .divider { height: 1px; background: #2e3144; margin: 8px 0; }
+    .footer { margin-top: 8px; text-align: center; font-size: 10px; color: #5c6072; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="header-icon">🔬</span>
+    <span class="header-title">Research Capturer</span>
+    <span id="statusBadge" class="status disconnected">Disconnected</span>
+  </div>
+  <div class="status-text" id="statusText">Not connected to Research Tool</div>
+
+  <button class="btn" id="captureElement">
+    <span class="btn-icon">🖱️</span>
+    Capture Element
+    <span class="btn-shortcut">Click</span>
+  </button>
+  <button class="btn" id="captureSelection">
+    <span class="btn-icon">📝</span>
+    Capture Selection
+    <span class="btn-shortcut">Select</span>
+  </button>
+  <button class="btn" id="captureTable">
+    <span class="btn-icon">📊</span>
+    Capture Table
+    <span class="btn-shortcut">Auto</span>
+  </button>
+
+  <div class="divider"></div>
+
+  <button class="btn" id="captureFullPage">
+    <span class="btn-icon">📋</span>
+    Full Page Capture
+    <span class="btn-shortcut">Instant</span>
+  </button>
+
+  <div class="footer">Research Tool v1.0</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

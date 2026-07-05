@@ -1,0 +1,55 @@
+{
+  "name": "tool-for-researchers",
+  "version": "1.0.0",
+  "description": "A desktop research tool for capturing web data",
+  "main": "main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:all": "electron-builder --win --mac"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "dependencies": {
+    "@langchain/core": "^1.2.1",
+    "@langchain/openai": "^1.5.3",
+    "langchain": "^1.5.2",
+    "puppeteer": "^25.3.0",
+    "uuid": "^9.0.0",
+    "ws": "^8.16.0"
+  },
+  "build": {
+    "appId": "com.researcher.tool",
+    "productName": "Research Tool",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main/**/*",
+      "renderer/**/*",
+      "extension/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "extension",
+        "to": "extension"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": null
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "icon": null
+    }
+  }
+}
