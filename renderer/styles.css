@@ -762,6 +762,30 @@ html, body {
   word-break: break-word;
 }
 
+.capture-image-preview {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.capture-image-preview img {
+  max-width: 100%;
+  max-height: 480px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  object-fit: contain;
+}
+
+.capture-image-preview.broken::after {
+  content: 'Image failed to load';
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.capture-image-preview.broken img {
+  display: none;
+}
+
 .detail-card-footer {
   padding: 12px 20px;
   border-top: 1px solid var(--border);
@@ -1188,6 +1212,58 @@ html, body {
   background: var(--bg-hover);
   color: var(--text-primary);
   border-color: var(--text-muted);
+}
+
+.msg-download-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.15s;
+  margin-top: 8px;
+}
+
+.message-wrapper.assistant:hover .msg-download-btn {
+  opacity: 1;
+}
+
+.msg-download-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.review-message-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.review-message-row .message {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.msg-download-btn-compact {
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
+  opacity: 0.6;
+  margin-top: 0;
+}
+
+.msg-download-btn-compact:hover {
+  opacity: 1;
 }
 
 .ai-messages .message-wrapper .message.assistant h1,

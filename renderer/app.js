@@ -108,32 +108,53 @@ function renderCaptureItem(capture, isActive, mode) {
   return div;
 }
 
-function renderCaptureDetail(capture) {
+function getCaptureDisplayText(capture) {
   const content = capture.data;
-  let displayText = '';
 
   switch (capture.type) {
     case 'element':
-      displayText = content.text || content.html || '(no content)';
-      break;
+      return content.text || content.html || '(no content)';
     case 'selection':
-      displayText = content.text || '(no text selected)';
-      break;
+      return content.text || '(no text selected)';
     case 'table':
-      displayText = content.tableRows
+      return content.tableRows
         ? content.tableRows.map(row => row.join('\t')).join('\n')
         : '(no table data)';
-      break;
     case 'fullpage':
-      displayText = content.text || '(no content)';
-      break;
+      return content.text || '(no content)';
     case 'manual':
-      displayText = content.text || '(empty note)';
-      break;
+      return content.text || '(empty note)';
     default:
-      displayText = JSON.stringify(content, null, 2);
+      return JSON.stringify(content, null, 2);
   }
+}
 
+function extractCaptureImageSrc(capture) {
+  if (capture.type !== 'element') return null;
+  const html = capture.data && capture.data.html;
+  if (!html) return null;
+  try {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const img = doc.querySelector('img');
+    const src = img && img.getAttribute('src');
+    if (!src) return null;
+    return new URL(src, capture.url).href;
+  } catch {
+    return null;
+  }
+}
+
+function buildCaptureContentBoxHtml(capture) {
+  const imageSrc = extractCaptureImageSrc(capture);
+  if (imageSrc) {
+    const preview = `<div class="capture-image-preview"><img src="${escapeHtml(imageSrc)}" alt="${escapeHtml(capture.pageTitle || 'Captured image')}" onerror="this.closest('.capture-image-preview').classList.add('broken')" /></div>`;
+    const text = (capture.data.text || '').trim();
+    return text ? preview + `<pre>${escapeHtml(text)}</pre>` : preview;
+  }
+  return `<pre>${escapeHtml(getCaptureDisplayText(capture))}</pre>`;
+}
+
+function renderCaptureDetail(capture) {
   captureDetail.innerHTML = `
     <div class="detail-card">
       <div class="detail-card-header">
@@ -156,7 +177,7 @@ function renderCaptureDetail(capture) {
           </div>
         </div>
         <div class="detail-content-box">
-          <pre>${escapeHtml(displayText)}</pre>
+          ${buildCaptureContentBoxHtml(capture)}
         </div>
       </div>
       <div class="detail-card-footer">
@@ -169,31 +190,6 @@ function renderCaptureDetail(capture) {
 }
 
 function renderReviewCaptureDetail(capture) {
-  const content = capture.data;
-  let displayText = '';
-
-  switch (capture.type) {
-    case 'element':
-      displayText = content.text || content.html || '(no content)';
-      break;
-    case 'selection':
-      displayText = content.text || '(no text selected)';
-      break;
-    case 'table':
-      displayText = content.tableRows
-        ? content.tableRows.map(row => row.join('\t')).join('\n')
-        : '(no table data)';
-      break;
-    case 'fullpage':
-      displayText = content.text || '(no content)';
-      break;
-    case 'manual':
-      displayText = content.text || '(empty note)';
-      break;
-    default:
-      displayText = JSON.stringify(content, null, 2);
-  }
-
   reviewCaptureDetail.innerHTML = `
     <div class="detail-card">
       <div class="detail-card-header">
@@ -216,7 +212,7 @@ function renderReviewCaptureDetail(capture) {
           </div>
         </div>
         <div class="detail-content-box">
-          <pre>${escapeHtml(displayText)}</pre>
+          ${buildCaptureContentBoxHtml(capture)}
         </div>
       </div>
       <div class="detail-card-footer">
@@ -805,7 +801,7 @@ function appendReviewAiMessage(role, content) {
   const div = document.createElement('div');
   div.className = `message ${role}`;
   div.textContent = content;
-  container.appendChild(div);
+    container.appendChild(div);
   container.scrollTop = container.scrollHeight;
 }
 
