@@ -381,6 +381,9 @@ async function loadSession(sessionId) {
     reviewSessionId.textContent = sessionId;
     showScreen('review');
     currentState = State.reviewing;
+    populateSessionSelectors();
+    document.getElementById('reviewAiSession').value = sessionId;
+    loadReviewAiSession(sessionId);
   } catch (err) {
     console.error('Failed to load session:', err);
   }
@@ -464,6 +467,9 @@ endBtn.addEventListener('click', async () => {
       const sessions = await window.api.getSessions();
       renderSessionList(sessions);
     }
+    populateSessionSelectors();
+    document.getElementById('reviewAiSession').value = currentSessionId;
+    loadReviewAiSession(currentSessionId);
   } catch (err) {
     console.error('Failed to load sessions:', err);
   }
@@ -602,6 +608,11 @@ function addAiMessage(sessionId, role, content) {
   }
   aiConversations[sessionId].push({ role, content });
   persistConversation(sessionId);
+
+  const reviewAiSession = document.getElementById('reviewAiSession');
+  if (reviewAiSession && reviewAiSession.value === sessionId) {
+    appendReviewAiMessage(role, content);
+  }
 
   if (sessionId !== currentAiSessionId) return;
 
@@ -786,37 +797,91 @@ function populateSessionSelectors() {
 
 /* ─── Review AI Panel ─── */
 
+function appendReviewAiMessage(role, content) {
+  const container = document.getElementById('reviewAiMessages');
+  const empty = container.querySelector('.ai-empty-msg');
+  if (empty) empty.remove();
+
+  const div = document.createElement('div');
+  div.className = `message ${role}`;
+  div.textContent = content;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function renderReviewAiMessages(sessionId) {
+  const container = document.getElementById('reviewAiMessages');
+  const msgs = aiConversations[sessionId] || [];
+  if (msgs.length === 0) {
+    container.innerHTML = '<div class="ai-empty-msg">Ask AI to analyze, summarize, or generate content from this session\'s data.</div>';
+    return;
+  }
+  container.innerHTML = '';
+  msgs.forEach(m => appendReviewAiMessage(m.role, m.content));
+}
+
+function loadReviewAiSession(sessionId) {
+  if (!sessionId) {
+    document.getElementById('reviewAiMessages').innerHTML = '<div class="ai-empty-msg">Ask AI to analyze, summarize, or generate content from this session\'s data.</div>';
+    return;
+  }
+  if (!aiConversations[sessionId] && window.api && window.api.chatLoad) {
+    window.api.chatLoad(sessionId).then(saved => {
+      aiConversations[sessionId] = saved || [];
+      renderReviewAiMessages(sessionId);
+    }).catch(() => {
+      aiConversations[sessionId] = [];
+      renderReviewAiMessages(sessionId);
+    });
+  } else {
+    renderReviewAiMessages(sessionId);
+  }
+}
+
 document.getElementById('reviewAiToggle').addEventListener('click', () => {
   document.getElementById('reviewAiPanel').classList.toggle('collapsed');
   populateSessionSelectors();
+  loadReviewAiSession(document.getElementById('reviewAiSession').value);
+});
+
+document.getElementById('reviewAiSession').addEventListener('change', () => {
+  loadReviewAiSession(document.getElementById('reviewAiSession').value);
 });
 
 document.getElementById('reviewAiSendBtn').addEventListener('click', async () => {
   const input = document.getElementById('reviewAiInput');
   const text = input.value.trim();
   if (!text) return;
-  input.value = '';
 
   const sessionId = document.getElementById('reviewAiSession').value;
   if (!sessionId) {
-    const container = document.getElementById('reviewAiMessages');
-    container.innerHTML = '<div class="message assistant">Please select a session first.</div>';
+    appendReviewAiMessage('assistant', 'Please select a session first.');
     return;
   }
+  input.value = '';
 
+  addAiMessage(sessionId, 'user', text);
+
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = 'message assistant';
+  loadingDiv.textContent = '⏳ Thinking...';
   const container = document.getElementById('reviewAiMessages');
-  container.innerHTML = `<div class="message user">${text}</div><div class="message assistant">⏳ Thinking...</div>`;
+  container.appendChild(loadingDiv);
+  container.scrollTop = container.scrollHeight;
 
+  const conv = aiConversations[sessionId] || [];
   try {
     let result;
     if (window.api) {
-      result = await window.api.aiChat(sessionId, [{ role: 'user', content: text }]);
+      result = await window.api.aiChat(sessionId, conv);
     } else {
       result = 'AI API not available.';
     }
-    container.innerHTML = `<div class="message user">${text}</div><div class="message assistant">${result}</div>`;
+    loadingDiv.remove();
+    addAiMessage(sessionId, 'assistant', result);
   } catch (err) {
-    container.innerHTML = `<div class="message user">${text}</div><div class="message assistant">Error: ${err.message}</div>`;
+    loadingDiv.remove();
+    addAiMessage(sessionId, 'assistant', 'Error: ' + err.message);
   }
 });
 
