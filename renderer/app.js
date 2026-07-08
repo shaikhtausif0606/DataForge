@@ -598,7 +598,29 @@ function persistConversation(sessionId) {
   }
 }
 
-function addAiMessage(sessionId, role, content) {
+function createDownloadButton(format, content, sessionId) {
+  const labels = { docx: '📄 Word', pptx: '📊 PPTX', xlsx: '📈 Excel', pdf: '📕 PDF' };
+  const btn = document.createElement('button');
+  btn.className = 'msg-export-btn';
+  const original = '⬇ ' + (labels[format] || format);
+  btn.textContent = original;
+  btn.title = `Download as ${format.toUpperCase()}`;
+  btn.addEventListener('click', async () => {
+    if (!window.api || !window.api.exportDocument) return;
+    btn.disabled = true;
+    try {
+      const res = await window.api.exportDocument(format, content, sessionId || 'ai-response');
+      btn.textContent = res && res.ok ? '✅ Saved' : original;
+    } catch (err) {
+      btn.textContent = '⚠️ Failed';
+    } finally {
+      setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 2000);
+    }
+  });
+  return btn;
+}
+
+function addAiMessage(sessionId, role, content, format) {
   if (!aiConversations[sessionId]) {
     aiConversations[sessionId] = [];
   }
@@ -607,7 +629,7 @@ function addAiMessage(sessionId, role, content) {
 
   const reviewAiSession = document.getElementById('reviewAiSession');
   if (reviewAiSession && reviewAiSession.value === sessionId) {
-    appendReviewAiMessage(role, content);
+    appendReviewAiMessage(role, content, format, sessionId);
   }
 
   if (sessionId !== currentAiSessionId) return;
@@ -640,6 +662,10 @@ function addAiMessage(sessionId, role, content) {
       setTimeout(() => { copyBtn.textContent = '📋'; }, 2000);
     });
     wrapper.appendChild(copyBtn);
+
+    if (format) {
+      wrapper.appendChild(createDownloadButton(format, content, sessionId));
+    }
   }
 
   aiMessages.appendChild(wrapper);
@@ -675,7 +701,7 @@ function renderAiMessages(sessionId) {
       </div>`;
     return;
   }
-  msgs.forEach(m => {
+  msgs.forEach((m, i) => {
     const wrapper = document.createElement('div');
     wrapper.className = `message-wrapper ${m.role}`;
     const div = document.createElement('div');
@@ -697,6 +723,13 @@ function renderAiMessages(sessionId) {
         setTimeout(() => { copyBtn.textContent = '📋'; }, 2000);
       });
       wrapper.appendChild(copyBtn);
+
+      const prevUser = msgs[i - 1];
+      if (prevUser && prevUser.role === 'user' && window.api && window.api.detectExportFormat) {
+        window.api.detectExportFormat(prevUser.content).then(format => {
+          if (format) wrapper.appendChild(createDownloadButton(format, m.content, sessionId));
+        }).catch(() => {});
+      }
     }
     aiMessages.appendChild(wrapper);
   });
@@ -729,7 +762,10 @@ async function sendAiMessage(text) {
       result = 'AI API not available (running outside Electron?)';
     }
     loadingDiv.remove();
-    addAiMessage(sessionId, 'assistant', result);
+    const format = window.api && window.api.detectExportFormat
+      ? await window.api.detectExportFormat(text).catch(() => null)
+      : null;
+    addAiMessage(sessionId, 'assistant', result, format);
   } catch (err) {
     loadingDiv.remove();
     addAiMessage(sessionId, 'assistant', 'Error: ' + err.message);
@@ -793,15 +829,24 @@ function populateSessionSelectors() {
 
 /* ─── Review AI Panel ─── */
 
-function appendReviewAiMessage(role, content) {
+function appendReviewAiMessage(role, content, format, sessionId) {
   const container = document.getElementById('reviewAiMessages');
   const empty = container.querySelector('.ai-empty-msg');
   if (empty) empty.remove();
 
+  const wrapper = document.createElement('div');
+  wrapper.className = `message-wrapper ${role}`;
+
   const div = document.createElement('div');
   div.className = `message ${role}`;
   div.textContent = content;
-    container.appendChild(div);
+  wrapper.appendChild(div);
+
+  if (role === 'assistant' && format) {
+    wrapper.appendChild(createDownloadButton(format, content, sessionId));
+  }
+
+  container.appendChild(wrapper);
   container.scrollTop = container.scrollHeight;
 }
 
@@ -813,7 +858,18 @@ function renderReviewAiMessages(sessionId) {
     return;
   }
   container.innerHTML = '';
-  msgs.forEach(m => appendReviewAiMessage(m.role, m.content));
+  msgs.forEach((m, i) => {
+    appendReviewAiMessage(m.role, m.content);
+    if (m.role === 'assistant') {
+      const prevUser = msgs[i - 1];
+      const wrapper = container.lastElementChild;
+      if (prevUser && prevUser.role === 'user' && window.api && window.api.detectExportFormat) {
+        window.api.detectExportFormat(prevUser.content).then(format => {
+          if (format && wrapper) wrapper.appendChild(createDownloadButton(format, m.content, sessionId));
+        }).catch(() => {});
+      }
+    }
+  });
 }
 
 function loadReviewAiSession(sessionId) {
@@ -874,7 +930,10 @@ document.getElementById('reviewAiSendBtn').addEventListener('click', async () =>
       result = 'AI API not available.';
     }
     loadingDiv.remove();
-    addAiMessage(sessionId, 'assistant', result);
+    const format = window.api && window.api.detectExportFormat
+      ? await window.api.detectExportFormat(text).catch(() => null)
+      : null;
+    addAiMessage(sessionId, 'assistant', result, format);
   } catch (err) {
     loadingDiv.remove();
     addAiMessage(sessionId, 'assistant', 'Error: ' + err.message);

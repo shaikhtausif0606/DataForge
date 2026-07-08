@@ -1266,6 +1266,40 @@ html, body {
   opacity: 1;
 }
 
+.msg-export-btn {
+  flex-shrink: 0;
+  width: auto;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.15s;
+  margin-top: 8px;
+}
+
+.message-wrapper.assistant:hover .msg-export-btn {
+  opacity: 1;
+}
+
+.msg-export-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.msg-export-btn:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
 .ai-messages .message-wrapper .message.assistant h1,
 .ai-messages .message-wrapper .message.assistant h2,
 .ai-messages .message-wrapper .message.assistant h3 {

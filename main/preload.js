@@ -35,6 +35,8 @@ contextBridge.exposeInMainWorld('api', {
   getApiKey: () => ipcRenderer.invoke('ai:get-api-key'),
   setApiKey: (key) => ipcRenderer.invoke('ai:set-api-key', key),
   aiChat: (sessionId, messages) => ipcRenderer.invoke('ai:chat', sessionId, messages),
+  detectExportFormat: (text) => ipcRenderer.invoke('export:detect-format', text),
+  exportDocument: (format, content, title) => ipcRenderer.invoke('export:document', { format, content, title }),
 
   /* ─── Settings ─── */
   settingsGet: (key) => ipcRenderer.invoke('settings:get', key),

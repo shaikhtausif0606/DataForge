@@ -8,6 +8,7 @@ const browserLauncher = require('./browser-launcher');
 const llmService = require('./llm-service');
 const chatStore = require('./chat-store');
 const settings = require('./settings-store');
+const documentExport = require('./document-export');
 
 let mainWindow;
 let chromeProcess = null;
@@ -161,6 +162,26 @@ ipcMain.handle('ai:set-api-key', async (_event, key) => {
 ipcMain.handle('ai:chat', async (_event, sessionId, messages) => {
   const data = await storage.getSessionData(sessionId);
   return llmService.chat(data, messages);
+});
+
+ipcMain.handle('export:detect-format', async (_event, userText) => {
+  return documentExport.detectFormat(userText);
+});
+
+ipcMain.handle('export:document', async (_event, { format, content, title }) => {
+  const buffer = await documentExport.generate(format, content, title);
+
+  const { filePath } = await dialog.showSaveDialog(mainWindow, {
+    defaultPath: `${title || 'ai-response'}.${format}`,
+    filters: [{ name: format.toUpperCase(), extensions: [format] }]
+  });
+
+  if (filePath) {
+    fs.writeFileSync(filePath, buffer);
+    return { ok: true, path: filePath };
+  }
+
+  return { ok: false };
 });
 
 /* ─── Settings ─── */
