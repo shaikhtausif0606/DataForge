@@ -2,6 +2,8 @@ const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const { addExtra } = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 
 function debugLog(msg) {
   const logFile = path.join(__dirname, '..', 'debug.log');
@@ -56,15 +58,16 @@ async function launchBrowser() {
     throw new Error('Extension directory not found at ' + extPath);
   }
 
-  let puppeteer;
+  let puppeteerBase;
   try {
-    puppeteer = await import('puppeteer');
+    puppeteerBase = await import('puppeteer');
   } catch (e) {
     throw new Error('Failed to load puppeteer: ' + e.message);
   }
 
+  const puppeteer = addExtra(puppeteerBase);
+  puppeteer.use(StealthPlugin());
   const chromePath = await puppeteer.executablePath();
-  debugLog('Puppeteer executablePath: ' + chromePath);
 
   const profileDir = path.join(os.tmpdir(), 'researcher-chrome-profile');
   try {
@@ -82,10 +85,11 @@ async function launchBrowser() {
     '--no-first-run',
     '--no-default-browser-check',
     '--start-maximized',
-    'about:blank'
+    '--disable-blink-features=AutomationControlled',
+    'https://www.google.com/'
   ];
 
-  debugLog('Launching Chrome via Puppeteer...');
+  debugLog('Launching Chrome via Puppeteer (stealth, system Chrome)...');
 
   try {
     const browser = await puppeteer.launch({
@@ -93,12 +97,14 @@ async function launchBrowser() {
       headless: false,
       devtools: false,
       args: args,
-      enableExtensions: true
+      enableExtensions: true,
+      ignoreDefaultArgs: ['--enable-automation']
     });
 
     const pid = browser.process().pid;
-    debugLog('Chrome launched via Puppeteer, PID: ' + pid);
-    return { path: chromePath, pid };
+    const launchedPath = browser.process().spawnfile || 'Google Chrome (system)';
+    debugLog('Chrome launched via Puppeteer, PID: ' + pid + ', path: ' + launchedPath);
+    return { path: launchedPath, pid };
   } catch (err) {
     throw new Error('Puppeteer launch failed: ' + err.message);
   }

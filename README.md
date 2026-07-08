@@ -60,7 +60,7 @@ npm start
 ## Tech Stack
 
 - **Electron 28** — Desktop framework
-- **Puppeteer** — Chrome automation with stealth anti-detection
+- **Puppeteer + puppeteer-extra-plugin-stealth** — automates the real system-installed Google Chrome (not a bundled Chromium) with anti-detection fingerprint patching. Meaningfully reduces bot-check frequency on most sites, but does not defeat CDP/TLS-level fingerprinting used by top-tier bot management (Cloudflare Turnstile, DataDome, Akamai)
 - **LangChain** — AI orchestration (OpenAI / OpenRouter)
 - **Vanilla JS** — No frontend framework
 - **WebSocket** — Extension-to-app communication on port 9876

@@ -18,6 +18,8 @@
     "@langchain/openai": "^1.5.3",
     "langchain": "^1.5.2",
     "puppeteer": "^25.3.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "uuid": "^9.0.0",
     "ws": "^8.16.0"
   },
