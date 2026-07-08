@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Research Capturer",
+  "name": "DataForge Capturer",
   "version": "1.0.0",
   "description": "Capture web data for research sessions",
   "permissions": [
@@ -22,6 +22,6 @@
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Research Capturer"
+    "default_title": "DataForge Capturer"
   }
 }

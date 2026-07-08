@@ -65,7 +65,8 @@ function getTypeLabel(type) {
     element: 'Element',
     selection: 'Text',
     table: 'Table',
-    fullpage: 'Full Page'
+    fullpage: 'Full Page',
+    manual: 'Manual Entry'
   };
   return labels[type] || type;
 }
@@ -126,6 +127,9 @@ function renderCaptureDetail(capture) {
     case 'fullpage':
       displayText = content.text || '(no content)';
       break;
+    case 'manual':
+      displayText = content.text || '(empty note)';
+      break;
     default:
       displayText = JSON.stringify(content, null, 2);
   }
@@ -182,6 +186,9 @@ function renderReviewCaptureDetail(capture) {
       break;
     case 'fullpage':
       displayText = content.text || '(no content)';
+      break;
+    case 'manual':
+      displayText = content.text || '(empty note)';
       break;
     default:
       displayText = JSON.stringify(content, null, 2);
@@ -839,6 +846,73 @@ document.getElementById('maximizeBtn').addEventListener('click', () => {
 
 document.getElementById('closeBtn').addEventListener('click', () => {
   if (window.api) window.api.closeWindow();
+});
+
+/* ─── Add Capture Manually ─── */
+
+let addCaptureMode = 'research';
+
+function openAddCaptureModal(mode) {
+  addCaptureMode = mode;
+  document.getElementById('addCaptureTitle').value = '';
+  document.getElementById('addCaptureUrl').value = '';
+  document.getElementById('addCaptureText').value = '';
+  document.getElementById('addCaptureStatus').textContent = '';
+  document.getElementById('addCaptureOverlay').classList.add('active');
+}
+
+function closeAddCaptureModal() {
+  document.getElementById('addCaptureOverlay').classList.remove('active');
+}
+
+document.getElementById('addManualBtnResearch').addEventListener('click', () => {
+  if (!currentSessionId) {
+    alert('Start a research session first.');
+    return;
+  }
+  openAddCaptureModal('research');
+});
+
+document.getElementById('addManualBtnReview').addEventListener('click', () => {
+  if (!reviewSessionId.textContent) {
+    alert('Open a session first.');
+    return;
+  }
+  openAddCaptureModal('review');
+});
+
+document.getElementById('addCaptureCloseBtn').addEventListener('click', closeAddCaptureModal);
+
+document.getElementById('addCaptureSaveBtn').addEventListener('click', async () => {
+  const status = document.getElementById('addCaptureStatus');
+  const pageTitle = document.getElementById('addCaptureTitle').value.trim();
+  const url = document.getElementById('addCaptureUrl').value.trim();
+  const text = document.getElementById('addCaptureText').value.trim();
+
+  if (!text) {
+    status.textContent = 'Content is required';
+    return;
+  }
+
+  const sessionId = addCaptureMode === 'review' ? reviewSessionId.textContent : currentSessionId;
+  if (!sessionId || !window.api || !window.api.addCapture) {
+    status.textContent = 'No active session';
+    return;
+  }
+
+  try {
+    const capture = await window.api.addCapture(sessionId, { pageTitle, url, text });
+    captures.push(capture);
+    if (addCaptureMode === 'review') {
+      renderReviewCapturesList();
+    } else {
+      renderCapturesList();
+      updateStats();
+    }
+    closeAddCaptureModal();
+  } catch (err) {
+    status.textContent = 'Error: ' + err.message;
+  }
 });
 
 /* ─── Confirm Delete Modal ─── */

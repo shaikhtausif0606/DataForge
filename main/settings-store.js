@@ -3,8 +3,8 @@ const path = require('path');
 
 function getFilePath() {
   const userData = process.env.APPDATA
-    ? path.join(process.env.APPDATA, 'research-tool')
-    : path.join(require('os').homedir(), '.research-tool');
+    ? path.join(process.env.APPDATA, 'dataforge')
+    : path.join(require('os').homedir(), '.dataforge');
   if (!fs.existsSync(userData)) {
     fs.mkdirSync(userData, { recursive: true });
   }

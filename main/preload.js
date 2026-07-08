@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('api', {
   getSessionData: (sessionId) => ipcRenderer.invoke('research:get-session-data', sessionId),
   exportJSON: (sessionId) => ipcRenderer.invoke('research:export-json', sessionId),
   deleteCapture: (sessionId, captureId) => ipcRenderer.invoke('research:delete-capture', sessionId, captureId),
+  addCapture: (sessionId, input) => ipcRenderer.invoke('research:add-capture', sessionId, input),
   deleteSession: (sessionId) => ipcRenderer.invoke('research:delete-session', sessionId),
   minimizeWindow: () => ipcRenderer.send('window:minimize'),
   maximizeWindow: () => ipcRenderer.send('window:maximize'),

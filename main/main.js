@@ -125,6 +125,24 @@ ipcMain.handle('research:delete-capture', async (_event, sessionId, captureId) =
   return storage.deleteCapture(sessionId, captureId);
 });
 
+ipcMain.handle('research:add-capture', async (_event, sessionId, input) => {
+  if (!sessionId) throw new Error('No session selected');
+
+  const capture = {
+    id: 'capt_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9),
+    timestamp: new Date().toISOString(),
+    url: (input.url && input.url.trim()) || 'manual://local-entry',
+    pageTitle: (input.pageTitle && input.pageTitle.trim()) || 'Untitled',
+    type: 'manual',
+    data: { text: input.text || '' },
+    sessionId,
+    manual: true
+  };
+
+  storage.saveCapture(sessionId, capture);
+  return capture;
+});
+
 ipcMain.handle('research:delete-session', async (_event, sessionId) => {
   return storage.deleteSession(sessionId);
 });

@@ -1,7 +1,7 @@
 {
   "name": "tool-for-researchers",
   "version": "1.0.0",
-  "description": "A desktop research tool for capturing web data",
+  "description": "DataForge - a desktop research tool for capturing web data",
   "main": "main/main.js",
   "scripts": {
     "start": "electron .",
@@ -25,7 +25,7 @@
   },
   "build": {
     "appId": "com.researcher.tool",
-    "productName": "Research Tool",
+    "productName": "DataForge",
     "directories": {
       "output": "dist"
     },

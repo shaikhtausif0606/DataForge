@@ -9,7 +9,7 @@ function updateStatus(connected) {
   } else {
     statusBadge.className = 'status disconnected';
     statusBadge.textContent = 'Disconnected';
-    statusText.textContent = 'Make sure Research Tool is open';
+    statusText.textContent = 'Make sure DataForge is open';
   }
 }
 

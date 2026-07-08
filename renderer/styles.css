@@ -132,7 +132,9 @@ html, body {
 }
 
 .logo-icon {
-  font-size: 22px;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
 }
 
 .logo-text {
@@ -431,8 +433,9 @@ html, body {
 }
 
 .welcome-icon {
-  font-size: 64px;
-  margin-bottom: 20px;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 20px;
   display: block;
 }
 
@@ -531,6 +534,12 @@ html, body {
 .captures-sidebar-header h3 {
   font-size: 13px;
   font-weight: 600;
+}
+
+.captures-sidebar-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .badge {
